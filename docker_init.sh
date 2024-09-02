@@ -748,6 +748,56 @@ stdout_logfile=/dev/null
         alias $WORK_DIR/subscribe/\$1;
       }
     }
+    server {
+      listen 127.0.0.1:80 ; # sing-box backend
+      server_name _;
+      
+  [ "${VMESS_WS}" = 'true' ] && NGINX_CONF+="
+      # 反代 sing-box vless websocket
+      location /${UUID}-vless {
+        if (\$http_upgrade != "websocket") {
+           return 404;
+        }
+        proxy_pass                          http://127.0.0.1:${PORT_VLESS_WS};
+        proxy_http_version                  1.1;
+        proxy_set_header Upgrade            \$http_upgrade;
+        proxy_set_header Connection         "upgrade";
+        proxy_set_header X-Real-IP          \$remote_addr;
+        proxy_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
+        proxy_set_header Host               \$host;
+        proxy_redirect                      off;
+      }"
+
+  [ "${VLESS_WS}" = 'true' ] && NGINX_CONF+="
+      # 反代 sing-box websocket
+      location /${UUID}-vmess {
+        if (\$http_upgrade != "websocket") {
+           return 404;
+        }
+        proxy_pass                          http://127.0.0.1:${PORT_VMESS_WS};
+        proxy_http_version                  1.1;
+        proxy_set_header Upgrade            \$http_upgrade;
+        proxy_set_header Connection         "upgrade";
+        proxy_set_header X-Real-IP          \$remote_addr;
+        proxy_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
+        proxy_set_header Host               \$host;
+        proxy_redirect                      off;
+      }"
+
+  NGINX_CONF+="
+      # 来自 /auto 的分流
+      location ~ ^/${UUID}/auto {
+        default_type 'text/plain; charset=utf-8';
+        alias $WORK_DIR/subscribe/\$path;
+      }
+
+      location ~ ^/${UUID}/(.*) {
+        autoindex on;
+        proxy_set_header X-Real-IP \$proxy_protocol_addr;
+        default_type 'text/plain; charset=utf-8';
+        alias $WORK_DIR/subscribe/\$1;
+      }
+    }
   }"
 
   echo "$NGINX_CONF" > /etc/nginx/nginx.conf
@@ -808,7 +858,7 @@ stdout_logfile=/dev/null
 
   # 生成 clash 订阅配置文件
   # 模板: 使用 proxy providers
-  wget -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/clash | sed "s#NODE_NAME#${NODE_NAME}#g; s#PROXY_PROVIDERS_URL#https://${ARGO_DOMAIN}/${UUID}/proxies#" > $WORK_DIR/subscribe/clash
+  wget -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/clash | sed "s#NODE_NAME#${NODE_NAME}#g; s#PROXY_PROVIDERS_URL#http://${ARGO_DOMAIN}/${UUID}/proxies#" > $WORK_DIR/subscribe/clash
 
   # 生成 ShadowRocket 订阅配置文件
   [ "${XTLS_REALITY}" = 'true' ] && local SHADOWROCKET_SUBSCRIBE+="
@@ -1043,14 +1093,14 @@ vless://${UUID}@${SERVER_IP_1}:${PORT_GRPC_REALITY}?security=reality&sni=addons.
   cat > $WORK_DIR/subscribe/qr << EOF
 自适应 Clash / V2rayN / NekoBox / ShadowRocket / SFI / SFA / SFM 客户端:
 模版:
-https://${ARGO_DOMAIN}/${UUID}/auto
+http://${ARGO_DOMAIN}/${UUID}/auto
 
 订阅 QRcode:
 模版:
-https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://${ARGO_DOMAIN}/${UUID}/auto
+https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${ARGO_DOMAIN}/${UUID}/auto
 
 模版:
-$($WORK_DIR/qrencode "https://${ARGO_DOMAIN}/${UUID}/auto")
+$($WORK_DIR/qrencode "http://${ARGO_DOMAIN}/${UUID}/auto")
 EOF
 
   # 生成配置文件
@@ -1107,41 +1157,41 @@ EXPORT_LIST_FILE+="
 *******************************************
 
 $(hint "Index:
-https://${ARGO_DOMAIN}/${UUID}/
+http://${ARGO_DOMAIN}/${UUID}/
 
 QR code:
-https://${ARGO_DOMAIN}/${UUID}/qr
+http://${ARGO_DOMAIN}/${UUID}/qr
 
 V2rayN 订阅:
-https://${ARGO_DOMAIN}/${UUID}/v2rayn")
+http://${ARGO_DOMAIN}/${UUID}/v2rayn")
 
 $(hint "NekoBox 订阅:
-https://${ARGO_DOMAIN}/${UUID}/neko")
+http://${ARGO_DOMAIN}/${UUID}/neko")
 
 $(hint "Clash 订阅:
-https://${ARGO_DOMAIN}/${UUID}/clash
+http://${ARGO_DOMAIN}/${UUID}/clash
 
 sing-box for pc 订阅:
-https://${ARGO_DOMAIN}/${UUID}/sing-box-pc
+http://${ARGO_DOMAIN}/${UUID}/sing-box-pc
 
 sing-box for cellphone 订阅:
-https://${ARGO_DOMAIN}/${UUID}/sing-box-phone
+http://${ARGO_DOMAIN}/${UUID}/sing-box-phone
 
 ShadowRocket 订阅:
-https://${ARGO_DOMAIN}/${UUID}/shadowrocket")
+http://${ARGO_DOMAIN}/${UUID}/shadowrocket")
 
 *******************************************
 
 $(info " 自适应 Clash / V2rayN / NekoBox / ShadowRocket / SFI / SFA / SFM 客户端:
 模版:
-https://${ARGO_DOMAIN}/${UUID}/auto
+http://${ARGO_DOMAIN}/${UUID}/auto
 
  订阅 QRcode:
 模版:
-https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://${ARGO_DOMAIN}/${UUID}/auto")
+https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${ARGO_DOMAIN}/${UUID}/auto")
 
 $(hint "模版:")
-$($WORK_DIR/qrencode https://${ARGO_DOMAIN}/${UUID}/auto)
+$($WORK_DIR/qrencode http://${ARGO_DOMAIN}/${UUID}/auto)
 "
 
   # 生成并显示节点信息
