@@ -747,7 +747,9 @@ stdout_logfile=/dev/null
         default_type 'text/plain; charset=utf-8';
         alias $WORK_DIR/subscribe/\$1;
       }
-    }
+    }"
+
+  NGINX_CONF+="
     server {
       listen 127.0.0.1:80 ; # sing-box backend
       server_name _;
@@ -756,7 +758,7 @@ stdout_logfile=/dev/null
       # 反代 sing-box vless websocket
       location /${UUID}-vless {
         if (\$http_upgrade != "websocket") {
-           return 404;
+          return 404;
         }
         proxy_pass                          http://127.0.0.1:${PORT_VLESS_WS};
         proxy_http_version                  1.1;
@@ -772,7 +774,7 @@ stdout_logfile=/dev/null
       # 反代 sing-box websocket
       location /${UUID}-vmess {
         if (\$http_upgrade != "websocket") {
-           return 404;
+          return 404;
         }
         proxy_pass                          http://127.0.0.1:${PORT_VMESS_WS};
         proxy_http_version                  1.1;
