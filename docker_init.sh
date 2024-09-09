@@ -753,7 +753,8 @@ stdout_logfile=/dev/null
     server {
       listen 127.0.0.1:80 ; # sing-box backend
       server_name _;
-      
+  "
+  
   [ "${VMESS_WS}" = 'true' ] && NGINX_CONF+="
       # 反代 sing-box vless websocket
       location /${UUID}-vless {
