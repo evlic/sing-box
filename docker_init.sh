@@ -693,16 +693,11 @@ stdout_logfile=/dev/null
       #include /etc/nginx/conf.d/*.conf;
 
     server {
-      listen 127.0.0.1:$START_PORT ssl ; # sing-box backend
-      http2 on;
-      server_name addons.mozilla.org;
+      listen 0.0.0.0:80 ; # sing-box backend
+      # http2 on;
+      # server_name addons.mozilla.org;
 
-      ssl_certificate            $WORK_DIR/cert/cert.pem;
-      ssl_certificate_key        $WORK_DIR/cert/private.key;
-      ssl_protocols              TLSv1.3;
-      ssl_session_tickets        on;
-      ssl_stapling               off;
-      ssl_stapling_verify        off;"
+      "
 
   [ "${VLESS_WS}" = 'true' ] && NGINX_CONF+="
       # 反代 sing-box vless websocket
@@ -810,7 +805,7 @@ stdout_logfile=/dev/null
 
   # 生成 clash 订阅配置文件
   # 模板: 使用 proxy providers
-  wget -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/clash | sed "s#NODE_NAME#${NODE_NAME}#g; s#PROXY_PROVIDERS_URL#https://${ARGO_DOMAIN}/${UUID}/proxies#" > $WORK_DIR/subscribe/clash
+  wget -qO- --tries=3 --timeout=2 ${SUBSCRIBE_TEMPLATE}/clash | sed "s#NODE_NAME#${NODE_NAME}#g; s#PROXY_PROVIDERS_URL#http://${ARGO_DOMAIN}/${UUID}/proxies#" > $WORK_DIR/subscribe/clash
 
   # 生成 ShadowRocket 订阅配置文件
   [ "${XTLS_REALITY}" = 'true' ] && local SHADOWROCKET_SUBSCRIBE+="
@@ -1045,14 +1040,10 @@ vless://${UUID}@${SERVER_IP_1}:${PORT_GRPC_REALITY}?security=reality&sni=addons.
   cat > $WORK_DIR/subscribe/qr << EOF
 自适应 Clash / V2rayN / NekoBox / ShadowRocket / SFI / SFA / SFM 客户端:
 模版:
-https://${ARGO_DOMAIN}/${UUID}/auto
-
-订阅 QRcode:
-模版:
-https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://${ARGO_DOMAIN}/${UUID}/auto
+http://${ARGO_DOMAIN}/${UUID}/auto
 
 模版:
-$($WORK_DIR/qrencode "https://${ARGO_DOMAIN}/${UUID}/auto")
+$($WORK_DIR/qrencode "http://${ARGO_DOMAIN}/${UUID}/auto")
 EOF
 
   # 生成配置文件
@@ -1109,41 +1100,41 @@ EXPORT_LIST_FILE+="
 *******************************************
 
 $(hint "Index:
-https://${ARGO_DOMAIN}/${UUID}/
+http://${ARGO_DOMAIN}/${UUID}/
 
 QR code:
-https://${ARGO_DOMAIN}/${UUID}/qr
+http://${ARGO_DOMAIN}/${UUID}/qr
 
 V2rayN 订阅:
-https://${ARGO_DOMAIN}/${UUID}/v2rayn")
+http://${ARGO_DOMAIN}/${UUID}/v2rayn")
 
 $(hint "NekoBox 订阅:
-https://${ARGO_DOMAIN}/${UUID}/neko")
+http://${ARGO_DOMAIN}/${UUID}/neko")
 
 $(hint "Clash 订阅:
-https://${ARGO_DOMAIN}/${UUID}/clash
+http://${ARGO_DOMAIN}/${UUID}/clash
 
 sing-box for pc 订阅:
-https://${ARGO_DOMAIN}/${UUID}/sing-box-pc
+http://${ARGO_DOMAIN}/${UUID}/sing-box-pc
 
 sing-box for cellphone 订阅:
-https://${ARGO_DOMAIN}/${UUID}/sing-box-phone
+http://${ARGO_DOMAIN}/${UUID}/sing-box-phone
 
 ShadowRocket 订阅:
-https://${ARGO_DOMAIN}/${UUID}/shadowrocket")
+http://${ARGO_DOMAIN}/${UUID}/shadowrocket")
 
 *******************************************
 
 $(info " 自适应 Clash / V2rayN / NekoBox / ShadowRocket / SFI / SFA / SFM 客户端:
 模版:
-https://${ARGO_DOMAIN}/${UUID}/auto
+http://${ARGO_DOMAIN}/${UUID}/auto
 
  订阅 QRcode:
 模版:
-https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://${ARGO_DOMAIN}/${UUID}/auto")
+https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=http://${ARGO_DOMAIN}/${UUID}/auto")
 
 $(hint "模版:")
-$($WORK_DIR/qrencode https://${ARGO_DOMAIN}/${UUID}/auto)
+$($WORK_DIR/qrencode http://${ARGO_DOMAIN}/${UUID}/auto)
 "
 
   # 生成并显示节点信息
