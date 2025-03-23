@@ -1212,6 +1212,12 @@ EOF
                 "type":"remote",
                 "format":"binary",
                 "url":"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-openai.srs"
+            },
+            {
+                "tag":"geosite-netflix",
+                "type":"remote",
+                "format":"binary",
+                "url":"https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-netflix.srs"
             }
         ],
         "rules":[
@@ -1221,6 +1227,9 @@ EOF
             },
             {
                 "rule_set":"geosite-openai",
+                "outbound":"$CHAT_GPT_OUT_V6"
+            },{
+                "rule_set":"geosite-netflix",
                 "outbound":"$CHAT_GPT_OUT_V6"
             }
         ]
