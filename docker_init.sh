@@ -90,10 +90,14 @@ EOF
   {
       "outbounds":[
           {
-
               "type":"direct",
               "tag":"direct",
               "domain_strategy":"${DOMAIN_STRATEG}"
+          },
+          {
+              "type":"direct",
+              "tag":"v6d",
+              "domain_strategy":"prefer_ipv6"
           },
           {
               "type":"direct",
@@ -161,7 +165,7 @@ EOF
                 "outbound":"$CHAT_GPT_OUT_V6"
             },{
                 "rule_set":"geosite-netflix",
-                "outbound":"$CHAT_GPT_OUT_V6"
+                "outbound":"v6d"
             }
         ]
     }

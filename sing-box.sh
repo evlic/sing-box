@@ -1166,6 +1166,11 @@ EOF
         },
         {
             "type":"direct",
+            "tag":"v6d",
+            "domain_strategy":"prefer_ipv6"
+        },
+        {
+            "type":"direct",
             "tag":"warp-IPv4-out",
             "detour":"wireguard-out",
             "domain_strategy":"ipv4_only"
@@ -1230,7 +1235,7 @@ EOF
                 "outbound":"$CHAT_GPT_OUT_V6"
             },{
                 "rule_set":"geosite-netflix",
-                "outbound":"$CHAT_GPT_OUT_V6"
+                "outbound":"v6d"
             }
         ]
     }
